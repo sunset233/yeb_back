@@ -14,15 +14,29 @@
 
     <resultMap id="DepartmentWithChildren" type="com.sunset.server.pojo.Department" extends="BaseResultMap">
         <collection property="children" ofType="com.sunset.server.pojo.Department"
-                    select="com.sunset.server.mapper.DepartmentMapper.getAllDepartments" column="id">
+                    select="com.sunset.server.mapper.DepartmentMapper.getAllDepartmentsByParentId" column="id">
 
         </collection>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, parentId, depPath, enable, isParent
+        id, name, parentId, depPath, enabled, isParent
     </sql>
-    <select id="getAllDepartments" resultMap="Departments">
+
+    <select id="addDep" statementType="CALLABLE">
+        call addDep(#{name, mode=IN, jdbcType=VARCHAR},
+            #{parentId, mode=IN, jdbcType=INTEGER},
+            #{enabled, mode=IN, jdbcType=BOOLEAN},
+            #{result, mode=OUT, jdbcType=INTEGER},
+            #{id, mode=OUT, jdbcType=INTEGER})
+    </select>
+
+    <select id="delDep" statementType="CALLABLE">
+        call deleteDep(#{id, mode=IN, jdbcType=INTEGER},
+            #{result, mode=OUT, jdbcType=INTEGER})
+    </select>
+
+    <select id="getAllDepartmentsByParentId" resultMap="DepartmentWithChildren">
         select
         <include refid="Base_Column_List"/>
         from t_department

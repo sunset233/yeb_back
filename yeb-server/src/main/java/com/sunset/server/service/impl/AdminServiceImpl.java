@@ -2,10 +2,13 @@ package com.sunset.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sunset.server.AdminUtils;
 import com.sunset.server.config.security.component.JwtTokenUtils;
 import com.sunset.server.mapper.AdminMapper;
+import com.sunset.server.mapper.AdminRoleMapper;
 import com.sunset.server.mapper.RoleMapper;
 import com.sunset.server.pojo.Admin;
+import com.sunset.server.pojo.AdminRole;
 import com.sunset.server.pojo.ResBean;
 import com.sunset.server.pojo.Role;
 import com.sunset.server.service.IAdminService;
@@ -17,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +51,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     private String tokenHead;
     @Autowired
     private RoleMapper roleMapper;
+    @Autowired
+    private AdminRoleMapper adminRoleMapper;
 
     @Override
     public ResBean login(String username, String password, String code, HttpServletRequest request){
@@ -87,5 +93,20 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         return roleMapper.getRoles(adminId);
     }
 
+    @Override
+    public List<Admin> getAllAdmins(String keywords) {
+        return adminMapper.getAllAdmins(AdminUtils.getCurrentAdmin().getId(), keywords);
+    }
 
+    @Override
+    @Transactional
+    public ResBean updateAdminRole(Integer adminId, Integer[] rids) {
+        adminRoleMapper.delete(new QueryWrapper<AdminRole>().eq("adminId", adminId));
+        Integer result = adminRoleMapper.addAdminRole(adminId, rids);
+        if(result == rids.length){
+            return ResBean.success("更新成功！");
+        }
+        return ResBean.error("更新失败！");
+
+    }
 }

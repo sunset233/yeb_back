@@ -15,5 +15,9 @@ import java.util.List;
  */
 public interface DepartmentMapper extends BaseMapper<Department> {
 
-    List<Department> getAllDepartments(Integer parentId);
+    List<Department> getAllDepartmentsByParentId(Integer parentId);
+
+    void addDep(Department dep);
+
+    void delDep(Department dep);
 }
